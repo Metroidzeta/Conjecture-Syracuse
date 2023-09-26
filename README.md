@@ -9,3 +9,7 @@ Le but du projet est de créer à partir de 0 la Conjucture de Syracuse en C afi
 
 Tout d’abord compiler : ```gcc -Wall arraylist.c syracuse.c -o prog.exe```  
 Puis exécuter : ```./prog```  
+
+## POUR LINUX
+
+Sur linux, pour pouvoir afficher correctement les "unsigned long long int", il faut remplacer (dans les printf) : "%I64u" par "%llu".
