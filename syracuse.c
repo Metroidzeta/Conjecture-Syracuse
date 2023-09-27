@@ -1,3 +1,5 @@
+// Projet réalisé par Metroidzeta
+
 #include "arraylist.h"
 
 #define TAB_SYRACUSE_TAILLE 10000
@@ -26,7 +28,7 @@ void syracuse_calcul(unsigned long long int x, arraylist_t * nombres_visites) {
 		printf("%I64u\n",x); //! --> remplacer %I64u par %llu si vous n'êtes pas sur Windows avec mingw
 		arraylist_add(nombres_visites,x);
 
-		if(arraylist_contains(syracuse_tab[hash(x)],x) || x == 1) { // Si x a déjà été calculé ou que x == 1
+		if(arraylist_contains(syracuse_tab[hash(x)],x) || x == 1) { // Si x a déjà été calculé ou que x = 1
 			break;
 		} else if(x % 2 == 0) { // Si x est pair
 			x /= 2;
@@ -61,7 +63,7 @@ void syracuse_tab_afficher() {
 
 int main(int argc, char *argv[]) {
 	syracuse_tab_create();
-	
+
 	syracuse(1000000000);
 	syracuse_tab_afficher();
 
