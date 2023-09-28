@@ -11,6 +11,7 @@ arraylist_t * arraylist_create() {
 	a->tab = malloc(sizeof(unsigned long long int) * ARRAYLIST_INITIAL_CAPACITY);
 	if(!a->tab) {
 		fprintf(stderr,"Echec d'allocation de memoire du tableau de l'arraylist\n");
+		free(a); // on vide l'allocation précédente
 		exit(EXIT_FAILURE); // quitter le programme
 	}
 	a->capacite = ARRAYLIST_INITIAL_CAPACITY;
