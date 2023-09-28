@@ -5,12 +5,12 @@
 arraylist_t * arraylist_create() {
 	arraylist_t * a = malloc(sizeof(arraylist_t));
 	if(!a) {
-		fprintf(stderr,"Echec d'allocation de l'arraylist\n");
+		perror("Echec d'allocation de l'arraylist");
 		exit(EXIT_FAILURE); // quitter le programme
 	}
 	a->tab = malloc(sizeof(unsigned long long int) * ARRAYLIST_INITIAL_CAPACITY);
 	if(!a->tab) {
-		fprintf(stderr,"Echec d'allocation de memoire du tableau de l'arraylist\n");
+		perror("Echec d'allocation de memoire du tableau de l'arraylist");
 		free(a); // on vide l'allocation précédente
 		exit(EXIT_FAILURE); // quitter le programme
 	}
@@ -34,7 +34,7 @@ bool arraylist_need_to_enlarge_capacity(arraylist_t * a) {
 		a->capacite *= 2;
 		a->tab = (unsigned long long int *) realloc(a->tab,sizeof(unsigned long long int) * a->capacite);
 		if(!a->tab) {
-			fprintf(stderr,"Echec de reallocation de memoire du tableau de l'arraylist\n");
+			perror("Echec de reallocation de memoire du tableau de l'arraylist");
 			return false; // erreur
 		}
 	}
