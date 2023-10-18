@@ -69,18 +69,18 @@ int arraylist_getIndexMilieu_dichotomique(arraylist_t * a, mpz_t x) {
 		milieu = gauche + (droite - gauche) / 2;
 		int cmp = mpz_cmp(a->tab[milieu],x);
 
-		if(cmp == 0) { // a->tab[milieu] == x, si l'élément est présent dans le tableau, retournez -1
+		if(cmp == 0) { // si a->tab[milieu] == x, l'élément est présent dans le tableau, retournez -1
 			return -1;
 		}
 
-		if(cmp > 0) { // a->tab[milieu] > x, si l'élément recherché est plus petit, recherchez dans la moitié gauche
+		if(cmp > 0) { // si a->tab[milieu] > x, l'élément recherché est plus petit, recherchez dans la moitié gauche
 			droite = milieu - 1;
 		} else { // Sinon, recherchez dans la moitié droite
 			gauche = milieu + 1;
 		}
 	}
 
-	return milieu; // Si l'élément n'est pas présent dans le tableau, retournez l'index du dernier milieu calculé
+	return milieu; // si l'élément n'est pas présent dans le tableau, retournez l'index du dernier milieu calculé
 }
 
 bool arraylist_isEmpty(arraylist_t * a) {
@@ -88,17 +88,17 @@ bool arraylist_isEmpty(arraylist_t * a) {
 }
 
 bool arraylist_contains(arraylist_t * a, mpz_t x) {
-	return arraylist_getIndexMilieu_dichotomique(a,x) == -1; // Si cette fonction renvoie -1 alors l'élement existe déjà
+	return arraylist_getIndexMilieu_dichotomique(a,x) == -1; // renvoie -1 si l'élement existe déjà
 }
 
-void arraylist_addSet_dichotomique(arraylist_t * a, mpz_t x) { // Ajout d'un élement dans le Set en respectant l'ordre croissant
+void arraylist_addSet_dichotomique(arraylist_t * a, mpz_t x) { // Ajoute l'élement dans le set en respectant l'ordre croissant (tableau trié)
 	if(arraylist_isEmpty(a)) {
 		arraylist_add(a,x);
 		return;
 	}
 
 	int milieu = arraylist_getIndexMilieu_dichotomique(a,x);
-	if(milieu != -1) { // Si l'élement n'existe pas déjà
+	if(milieu != -1) { // si l'élement n'existe pas déjà
 		if(mpz_cmp(x,a->tab[milieu]) < 0) { // si x < a->tab[milieu]
 			arraylist_add_pos(a,x,milieu);
 		} else {

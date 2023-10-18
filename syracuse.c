@@ -18,7 +18,7 @@ arraylist_t * syracuse_tab[TAB_SYRACUSE_TAILLE];
 int hash(mpz_t x) {
 	mpz_t temp;
 	mpz_init(temp);
-	mpz_mod_ui(temp,x,TAB_SYRACUSE_TAILLE); // x % TAB_SYRACUSE_TAILLE
+	mpz_mod_ui(temp,x,TAB_SYRACUSE_TAILLE); // temp = x % TAB_SYRACUSE_TAILLE
 	int result = mpz_get_ui(temp);
 	mpz_clear(temp);
 	return result;
@@ -56,7 +56,7 @@ void syracuse_calcul(mpz_t x, arraylist_t * nombres_visites) {
 
 void syracuse(mpz_t x) {
 	if(mpz_cmp_ui(x,1) < 0) { // Si x < 1
-		printf("ERREUR: le nombre doit etre strictement positif (> 0)\n");
+		printf("Erreur: le nombre doit etre strictement positif (> 0)\n");
 		return;
 	}
 	arraylist_t * nombres_visites = arraylist_create();
@@ -84,8 +84,8 @@ bool estNombre(const char * str) {
 
 	int index = 0;
 	while(str[index] != '\0') {
-		if(!isdigit(str[index])) {
-			return false; // Le caractère n'est pas un chiffre
+		if(!isdigit(str[index])) { // Le caractère n'est pas un chiffre
+			return false;
 		}
 		index++;
 	}
@@ -106,25 +106,28 @@ int main() {
 
 	while(true) {
 		printf("Veuillez taper un nombre a tester (ou \"fin\" pour quitter) : ");
-		fgets(input,TAILLE_NOMBRE_INPUT - 1,stdin);
-		size_t len = strcspn(input,"\n");
-		if(input[len] == '\n') {
-			input[len] = '\0'; // Remplace le '\n' par un '\0' pour supprimer la nouvelle ligne
-		} else {
-			viderTampon();
-		}
+		if(fgets(input, TAILLE_NOMBRE_INPUT - 1, stdin) != NULL) {
+			size_t len = strcspn(input,"\n");
+			if(input[len] == '\n') {
+				input[len] = '\0'; // Remplace le '\n' par un '\0' pour supprimer la nouvelle ligne
+			} else {
+				viderTampon();
+			}
 
-		if(strcmp(input,"fin") == 0 || strcmp(input,"end") == 0) { // Si l'utilisateur écrit "fin" ou "end"
-			break;
-		}
+			if(strcmp(input,"fin") == 0 || strcmp(input,"end") == 0) { // Si l'utilisateur écrit "fin" ou "end"
+				break;
+			}
 
-		if(estNombre(input)) {
-			mpz_init_set_str(x,input,10);
-			syracuse(x);
-			//syracuse_tab_afficher();
-			mpz_clear(x);
+			if(estNombre(input)) {
+				mpz_init_set_str(x,input,10);
+				syracuse(x);
+				//syracuse_tab_afficher();
+				mpz_clear(x);
+			} else {
+				printf("Erreur: Ce n'est pas un nombre\n");
+			}
 		} else {
-			printf("Ce n'est pas un nombre\n");
+			 printf("Erreur: mauvaise saisie\n");
 		}
 	}
 

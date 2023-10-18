@@ -1,9 +1,9 @@
 # Conjecture-Syracuse
 Projet entièrement réalisé par Metroidzeta.  
-La [Conjecture de Syracuse](https://fr.wikipedia.org/wiki/Conjecture_de_Syracuse) (appelé aussi conjecture de Collatz, ou encore conjecture d'Ulam) en C avec de la [programmation dynamique](https://fr.wikipedia.org/wiki/Programmation_dynamique) pour éviter de recalculer les mêmes entiers en réutilisant les résultats précédents.  
+La [Conjecture de Syracuse](https://fr.wikipedia.org/wiki/Conjecture_de_Syracuse) (appelé aussi conjecture de Collatz, ou encore conjecture d'Ulam) en C avec la bibliothèque [GMP](https://fr.wikipedia.org/wiki/GNU_MP) pour manipuler de très grands nombres et la [programmation dynamique](https://fr.wikipedia.org/wiki/Programmation_dynamique) pour éviter de recalculer les mêmes entiers en réutilisant les résultats précédents.  
 Evidemment, la programmation dynamique est utile seulement si on test plusieurs nombres à la suite sans fermer le programme.  
 
-Le but du projet est de recréer la Conjucture de Syracuse en C afin de vérifier pour n'importe quel entier strictement positif (> 0) si il fini par atteindre 1 ou non, pour déterminer si la conjecture est vraie.  
+Le but du projet est de recréer la Conjucture de Syracuse en C pour vérifier si n'importe quel entier strictement positif (> 0) fini par atteindre 1 ou non, afin de déterminer si la conjecture est vraie.  
 
 ## POUR DEMARRER LE PROGRAMME
 
