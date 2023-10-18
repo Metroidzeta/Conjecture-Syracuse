@@ -6,13 +6,13 @@ arraylist_t * arraylist_create() {
 	arraylist_t * a = malloc(sizeof(arraylist_t));
 	if(!a) {
 		perror("Echec d'allocation de l'arraylist");
-		exit(EXIT_FAILURE); // quitter le programme
+		exit(EXIT_FAILURE);
 	}
-	a->tab = malloc(sizeof(unsigned long long int) * ARRAYLIST_INITIAL_CAPACITY);
+	a->tab = malloc(sizeof(mpz_t) * ARRAYLIST_INITIAL_CAPACITY);
 	if(!a->tab) {
 		perror("Echec d'allocation de memoire du tableau de l'arraylist");
 		free(a); // on vide l'allocation précédente
-		exit(EXIT_FAILURE); // quitter le programme
+		exit(EXIT_FAILURE);
 	}
 	a->capacite = ARRAYLIST_INITIAL_CAPACITY;
 	a->taille = 0;
@@ -20,19 +20,17 @@ arraylist_t * arraylist_create() {
 }
 
 void arraylist_free(arraylist_t * a) {
-	if(a) {
-		if(a->tab) {
-			free(a->tab);
-			a->tab = NULL; // Définir a->tab à NULL après la libération
-		}
-		free(a);
+	for(int i = 0; i < a->taille; i++) {
+		mpz_clear(a->tab[i]);
 	}
+	free(a->tab);
+	free(a);
 }
 
 bool arraylist_need_to_enlarge_capacity(arraylist_t * a) {
 	if(a->taille == a->capacite) {
 		a->capacite *= 2;
-		a->tab = (unsigned long long int *) realloc(a->tab,sizeof(unsigned long long int) * a->capacite);
+		a->tab = (mpz_t*) realloc(a->tab,sizeof(mpz_t) * a->capacite);
 		if(!a->tab) {
 			perror("Echec de reallocation de memoire du tableau de l'arraylist");
 			return false; // erreur
@@ -41,39 +39,41 @@ bool arraylist_need_to_enlarge_capacity(arraylist_t * a) {
 	return true;
 }
 
-bool arraylist_add(arraylist_t * a, unsigned long long int x) {
-	if(!a || !arraylist_need_to_enlarge_capacity(a)) {
+bool arraylist_add(arraylist_t * a, mpz_t x) {
+	if(!arraylist_need_to_enlarge_capacity(a)) {
 		return false; // erreur
 	}
-	a->tab[a->taille++] = x;
-	return true;
-}
-
-bool arraylist_add_pos(arraylist_t * a, unsigned long long int x, int pos) {
-	if(!a || !arraylist_need_to_enlarge_capacity(a) || pos < 0 || pos > a->capacite) {
-		return false; // erreur
-	}
-	for(int i = a->taille; i > pos; i--) {
-		a->tab[i] = a->tab[i - 1];
-	}
-	a->tab[pos] = x;
+	mpz_init_set(a->tab[a->taille],x); // a->tab[a->taille] = x
 	a->taille++;
 	return true;
 }
 
-int arraylist_getIndexMilieu_dichotomique(arraylist_t * a, unsigned long long int x) {
+bool arraylist_add_pos(arraylist_t * a, mpz_t x, int pos) {
+	if(!arraylist_need_to_enlarge_capacity(a) || pos < 0 || pos > a->capacite) {
+		return false; // erreur
+	}
+	for(int i = a->taille; i > pos; i--) {
+		mpz_init_set(a->tab[i],a->tab[i - 1]); //a->tab[i] = a->tab[i - 1]
+	}
+	mpz_init_set(a->tab[pos],x); // a->tab[pos] = x
+	a->taille++;
+	return true;
+}
+
+int arraylist_getIndexMilieu_dichotomique(arraylist_t * a, mpz_t x) {
 	int gauche = 0;
 	int droite = a->taille - 1;
 	int milieu = 0;
 
 	while(gauche <= droite) {
 		milieu = gauche + (droite - gauche) / 2;
+		int cmp = mpz_cmp(a->tab[milieu],x);
 
-		if(a->tab[milieu] == x) { // Si l'élément est présent dans le tableau, retournez -1
+		if(cmp == 0) { // a->tab[milieu] == x, si l'élément est présent dans le tableau, retournez -1
 			return -1;
 		}
 
-		if(a->tab[milieu] > x) { // Si l'élément recherché est plus petit, recherchez dans la moitié gauche
+		if(cmp > 0) { // a->tab[milieu] > x, si l'élément recherché est plus petit, recherchez dans la moitié gauche
 			droite = milieu - 1;
 		} else { // Sinon, recherchez dans la moitié droite
 			gauche = milieu + 1;
@@ -83,16 +83,15 @@ int arraylist_getIndexMilieu_dichotomique(arraylist_t * a, unsigned long long in
 	return milieu; // Si l'élément n'est pas présent dans le tableau, retournez l'index du dernier milieu calculé
 }
 
-bool arraylist_isEmpty(arraylist_t  * a) {
+bool arraylist_isEmpty(arraylist_t * a) {
 	return a->taille == 0;
 }
 
-bool arraylist_contains(arraylist_t * a, unsigned long long int x) {
-	return a && arraylist_getIndexMilieu_dichotomique(a,x) == -1; // Si cette fonction renvoie -1 alors l'élement existe déjà
+bool arraylist_contains(arraylist_t * a, mpz_t x) {
+	return arraylist_getIndexMilieu_dichotomique(a,x) == -1; // Si cette fonction renvoie -1 alors l'élement existe déjà
 }
 
-void arraylist_addSet_dichotomique(arraylist_t * a, unsigned long long int x) { // Ajout d'un élement dans le Set en respectant l'ordre croissant
-	if(!a) { return; }
+void arraylist_addSet_dichotomique(arraylist_t * a, mpz_t x) { // Ajout d'un élement dans le Set en respectant l'ordre croissant
 	if(arraylist_isEmpty(a)) {
 		arraylist_add(a,x);
 		return;
@@ -100,7 +99,7 @@ void arraylist_addSet_dichotomique(arraylist_t * a, unsigned long long int x) { 
 
 	int milieu = arraylist_getIndexMilieu_dichotomique(a,x);
 	if(milieu != -1) { // Si l'élement n'existe pas déjà
-		if(x < a->tab[milieu]) {
+		if(mpz_cmp(x,a->tab[milieu]) < 0) { // si x < a->tab[milieu]
 			arraylist_add_pos(a,x,milieu);
 		} else {
 			arraylist_add_pos(a,x,milieu + 1);
