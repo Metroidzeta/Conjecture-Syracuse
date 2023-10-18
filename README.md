@@ -11,13 +11,21 @@ Tout d’abord compiler : ```gcc -Wall -I include -o prog *.c -L lib -lgmp-10```
 Puis exécuter : ```./prog```  
 
 Une fois le programme démarré, on vous demandera de taper un nombre positif :  
-```Veuillez taper un nombre a tester :```  
+```Veuillez taper un nombre a tester (ou "fin" pour quitter) :```  
 
-Exemple avec 16 :  
+Exemple avec 17 :  
 
 ```
-Veuillez taper un nombre a tester : 16
--- Syracuse de 16 : --
+Veuillez taper un nombre a tester (ou "fin" pour quitter) : 17
+-- Syracuse de 17 : --
+17
+52
+26
+13
+40
+20
+10
+5
 16
 8
 4

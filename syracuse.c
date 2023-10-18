@@ -105,7 +105,7 @@ int main() {
 	char input[TAILLE_NOMBRE_INPUT];
 
 	while(true) {
-		printf("Veuillez taper un nombre a tester : ");
+		printf("Veuillez taper un nombre a tester (ou \"fin\" pour quitter) : ");
 		fgets(input,TAILLE_NOMBRE_INPUT - 1,stdin);
 		size_t len = strcspn(input,"\n");
 		if(input[len] == '\n') {
