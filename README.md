@@ -13,13 +13,15 @@ Puis exécuter : ```./prog```
 Une fois le programme démarré, on vous demandera de taper un nombre positif :  
 ```Veuillez taper un nombre a tester :```  
 Exemple avec 16 :  
-``` Veuillez taper un nombre a tester : 16
+```
+Veuillez taper un nombre a tester : 16
 -- Syracuse de 16 : --
 16
 8
 4
 2
-1 (fin | deja evalue)```  
+1 (fin | deja evalue)
+```
 
 ## BIBLIOTHEQUE GMP
 
