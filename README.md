@@ -12,7 +12,9 @@ Puis exécuter : ```./prog```
 
 Une fois le programme démarré, on vous demandera de taper un nombre positif :  
 ```Veuillez taper un nombre a tester :```  
+
 Exemple avec 16 :  
+
 ```
 Veuillez taper un nombre a tester : 16
 -- Syracuse de 16 : --
@@ -22,9 +24,8 @@ Veuillez taper un nombre a tester : 16
 2
 1 (fin | deja evalue)
 ```
-
 ## BIBLIOTHEQUE GMP
 
 La bibliothèque [GMP](https://fr.wikipedia.org/wiki/GNU_MP) est obligatoire et doit être installé pour exécuter ce programme.  
-Elle permet de taper des très grands nombres, mêmes ceux supérieurs à 2^64 - 1 (codé sur 64 bits), exemple : 10^24
+Elle permet de taper des très grands nombres, mêmes ceux supérieurs à 2^64 - 1 (codé sur 64 bits), exemple : 10^24.
 Vous pouvez l'installer manuellement ou bien mettre le fichier "gmp.h" dans le dossier /include, et le fichier "libgmp-10.dll" dans le dossier /lib
