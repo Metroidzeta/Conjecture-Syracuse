@@ -1,48 +1,47 @@
-// Projet réalisé par Metroidzeta
-//
-// Tout d'abord: installer la bibliothèque gmp.
-// Ou bien, mettre le fichier "gmp.h" dans le dossier /include, et le fichier "libgmp-10.dll" dans le dossier /lib
-//
-// Pour complier avec Windows: gcc -Wall -I include -o prog *.c -L lib -lgmp-10
-// Pour exécuter: ./prog
-
+/* Auteur du projet : Metroidzeta
+	- Tout d'abord, installer la bibliothèque GMP (fichier "gmp.h" dans le dossier /include, et "libgmp-10.dll" dans le dossier /lib)
+	Pour compiler :
+		> gcc -Wall -I include -o prog *.c -L lib -lgmp-10
+	Pour exécuter :
+		> ./prog
+*/
 #include "arraylist.h"
 #include <string.h>
 #include <ctype.h>
 
-#define TAILLE_NOMBRE_INPUT 1000
-#define TAB_SYRACUSE_TAILLE 10000
+#define SIZE_NUMBER_INPUT 1000
+#define SIZE_ARRAY_SYRACUSE 10000
 
-arraylist_t * syracuse_tab[TAB_SYRACUSE_TAILLE];
+arraylist_t * syracuse_arrayNumbers[SIZE_ARRAY_SYRACUSE];
 
 int hash(mpz_t x) {
 	mpz_t temp;
 	mpz_init(temp);
-	mpz_mod_ui(temp,x,TAB_SYRACUSE_TAILLE); // temp = x % TAB_SYRACUSE_TAILLE
+	mpz_mod_ui(temp,x,SIZE_ARRAY_SYRACUSE); // temp = x % SIZE_ARRAY_SYRACUSE
 	int result = mpz_get_ui(temp);
 	mpz_clear(temp);
 	return result;
 }
 
-void syracuse_tab_create() {
-	for(int i = 0; i < TAB_SYRACUSE_TAILLE; i++) {
-		syracuse_tab[i] = arraylist_create();
+void syracuse_createArray() {
+	for(int i = 0; i < SIZE_ARRAY_SYRACUSE; i++) {
+		syracuse_arrayNumbers[i] = arraylist_create();
 	}
 }
 
-void syracuse_tab_free() {
-	for(int i = 0; i < TAB_SYRACUSE_TAILLE; i++) {
-		arraylist_free(syracuse_tab[i]);
+void syracuse_freeArray() {
+	for(int i = 0; i < SIZE_ARRAY_SYRACUSE; i++) {
+		arraylist_free(syracuse_arrayNumbers[i]);
 	}
 }
 
-void syracuse_calcul(mpz_t x, arraylist_t * nombres_visites) {
+void syracuse_calcul(mpz_t x, arraylist_t * visited_numbers) {
 	while(true) {
 		gmp_printf("%Zd",x);
-		arraylist_add(nombres_visites,x);
+		arraylist_add(visited_numbers,x);
 
-		if(arraylist_contains(syracuse_tab[hash(x)],x) || mpz_cmp_ui(x,1) == 0) { // Si x a déjà été calculé OU x = 1
-			printf(" (fin | deja evalue)\n");
+		if(arraylist_contains(syracuse_arrayNumbers[hash(x)],x) || mpz_cmp_ui(x,1) == 0) { // Si x a déjà été calculé OU x = 1
+			printf(" (deja evalue)\n");
 			break;
 		} else if(mpz_even_p(x)) { // Si x est pair
 			mpz_divexact_ui(x,x,2); // x = x / 2
@@ -55,76 +54,73 @@ void syracuse_calcul(mpz_t x, arraylist_t * nombres_visites) {
 }
 
 void syracuse(mpz_t x) {
-	if(mpz_cmp_ui(x,1) < 0) { // Si x < 1
-		printf("Erreur: le nombre doit etre strictement positif (> 0)\n");
-		return;
-	}
-	arraylist_t * nombres_visites = arraylist_create();
+	arraylist_t * visited_numbers = arraylist_create();
 	gmp_printf("-- Syracuse de %Zd : --\n", x);
-	syracuse_calcul(x,nombres_visites);
+	syracuse_calcul(x,visited_numbers);
 
-	for(int i = 0; i < nombres_visites->taille; i++) {
-		arraylist_addSet_dichotomique(syracuse_tab[hash(nombres_visites->tab[i])],nombres_visites->tab[i]);
+	for(int i = 0; i < visited_numbers->size; i++) {
+		arraylist_addDichotomous(syracuse_arrayNumbers[hash(visited_numbers->data[i])],visited_numbers->data[i]);
 	}
-	arraylist_free(nombres_visites);
+	arraylist_free(visited_numbers);
 }
 
-void syracuse_tab_afficher() {
-	for(int i = 0; i < TAB_SYRACUSE_TAILLE; i++) {
-		for(int j = 0; j < syracuse_tab[i]->taille; j++) {
-			gmp_printf("syracuse_tab[%d]->tab[%d] = %Zd\n",i,j,syracuse_tab[i]->tab[j]);
+void syracuse_printArray() {
+	for(int i = 0; i < SIZE_ARRAY_SYRACUSE; i++) {
+		for(int j = 0; j < syracuse_arrayNumbers[i]->size; j++) {
+			gmp_printf("syracuse_arrayNumbers[%d]->data[%d] = %Zd\n",i,j,syracuse_arrayNumbers[i]->data[j]);
 		}
 	}
 }
 
-bool estNombre(const char * str) {
-	if(str == NULL || str[0] == '\0') { // Si str est null ou vide, ce n'est pas un nombre
-		return false;
-	}
+bool isStrictlyPositiveNumber(const char * str) {
+	if(str == NULL || str[0] == '\0') { return false; } // Si str est null ou vide, ce n'est pas un nombre
 
 	int index = 0;
+	bool zeroOnly = (str[0] == '0');
 	while(str[index] != '\0') {
 		if(!isdigit(str[index])) { // Le caractère n'est pas un chiffre
 			return false;
 		}
+		if(zeroOnly && str[index] != '0') { // Vérifier si ce n'est pas que des 0
+			zeroOnly = false;
+		}
 		index++;
 	}
 
-	return true;
+	return !zeroOnly;
 }
 
-void viderTampon() {
+void emptyBuffer() {
 	int c;
 	while((c = getchar()) != '\n' && c != EOF);
 }
 
 int main() {
-	syracuse_tab_create();
-
+	syracuse_createArray();
 	mpz_t x;
-	char input[TAILLE_NOMBRE_INPUT];
+	char input[SIZE_NUMBER_INPUT];
 
 	while(true) {
-		printf("Veuillez taper un nombre a tester (ou \"fin\" pour quitter) : ");
-		if(fgets(input, TAILLE_NOMBRE_INPUT - 1, stdin) != NULL) {
+		printf("Veuillez taper un nombre a tester (ou taper \"fin\" pour quitter) : ");
+		if(fgets(input, SIZE_NUMBER_INPUT - 1, stdin) != NULL) {
 			size_t len = strcspn(input,"\n");
 			if(input[len] == '\n') {
 				input[len] = '\0'; // Remplace le '\n' par un '\0' pour supprimer la nouvelle ligne
 			} else {
-				viderTampon();
+				emptyBuffer();
 			}
 
-			if(strcmp(input,"fin") == 0 || strcmp(input,"end") == 0) { // Si l'utilisateur écrit "fin" ou "end"
+			if(strcmp(input,"fin") == 0 || strcmp(input,"end") == 0) { // Si l'utilisateur écrit "quitter", "fin" ou "end"
 				break;
 			}
 
-			if(estNombre(input)) {
+			if(isStrictlyPositiveNumber(input)) {
 				mpz_init_set_str(x,input,10);
 				syracuse(x);
-				//syracuse_tab_afficher();
+				//syracuse_printArray();
 				mpz_clear(x);
 			} else {
-				printf("Erreur: Ce n'est pas un nombre\n");
+				printf("Erreur: ce n'est pas un nombre strictement postif (> 0)\n");
 			}
 		} else {
 			 printf("Erreur: mauvaise saisie\n");
@@ -132,7 +128,7 @@ int main() {
 	}
 
 	printf("Fin du programme\n");
-	syracuse_tab_free();
+	syracuse_freeArray();
 
 	return EXIT_SUCCESS;
 }

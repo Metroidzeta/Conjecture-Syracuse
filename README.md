@@ -30,7 +30,7 @@ Veuillez taper un nombre a tester (ou "fin" pour quitter) : 17
 8
 4
 2
-1 (fin | deja evalue)
+1 (deja evalue)
 ```
 ## BIBLIOTHEQUE GMP
 
