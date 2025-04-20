@@ -1,22 +1,26 @@
-/* Auteur du projet : Metroidzeta
-	- Tout d'abord, installer la bibliothèque GMP (fichier "gmp.h" dans le dossier /include, et "libgmp-10.dll" dans le dossier /lib)
-	Pour compiler :
-		> gcc -Wall -I include -o prog *.c -L lib -lgmp-10
-	Pour exécuter :
-		> ./prog
-*/
+/* 
+ * @author Alain Barbier alias "Metroidzeta"
+ * 
+ * - Tout d'abord, installer la bibliothèque GMP (ou l'importer)
+ * 
+ * Pour compiler :
+ *     > gcc -Wall -I include -L lib -o prog *.c -lgmp-10
+ * Pour exécuter :
+ *     > ./prog
+ */
+
 #include "arraylist.h"
 
 arraylist_t * arraylist_create() {
 	arraylist_t * a = malloc(sizeof(arraylist_t));
-	if(!a) {
-		perror("Echec d'allocation de l'arraylist");
+	if (!a) {
+		perror("Echec d'allocation de l'arraylist\n");
 		exit(EXIT_FAILURE);
 	}
 	a->data = malloc(sizeof(mpz_t) * ARRAYLIST_INITIAL_CAPACITY);
-	if(!a->data) {
-		perror("Echec d'allocation de memoire du tableau de l'arraylist");
-		free(a); // On vide l'allocation précédente
+	if (!a->data) {
+		perror("Echec d'allocation de memoire du tableau de l'arraylist\n");
+		free(a);
 		exit(EXIT_FAILURE);
 	}
 	a->capacity = ARRAYLIST_INITIAL_CAPACITY;
@@ -24,84 +28,73 @@ arraylist_t * arraylist_create() {
 	return a;
 }
 
-void arraylist_free(arraylist_t * a) {
-	for(int i = 0; i < a->size; i++) {
+void arraylist_free(arraylist_t *a) {
+	if (!a) return;
+	for (int i = 0; i < a->size; i++) {
 		mpz_clear(a->data[i]);
 	}
 	free(a->data);
 	free(a);
 }
 
-bool arraylist_needToEnlargeCapacity(arraylist_t * a) {
-	if(a->size == a->capacity) {
-		a->capacity *= 2;
-		a->data = (mpz_t*) realloc(a->data,sizeof(mpz_t) * a->capacity);
-		if(!a->data) {
-			perror("Echec de reallocation de memoire du tableau de l'arraylist");
-			return false; // Erreur
-		}
+static void arraylist_enlargeCapacity(arraylist_t *a) {
+	a->capacity *= 2;
+	mpz_t * new_data = (mpz_t*) realloc(a->data, sizeof(mpz_t) * a->capacity);
+	if (!new_data) {
+		perror("Echec de reallocation de memoire du tableau de l'arraylist\n");
+		exit(EXIT_FAILURE);
 	}
-	return true;
+	a->data = new_data;
 }
 
-bool arraylist_add(arraylist_t * a, mpz_t x) {
-	if(!arraylist_needToEnlargeCapacity(a)) { return false; }
-	mpz_init_set(a->data[a->size++],x); // a->data[a->size++] = x
-	return true;
+void arraylist_add(arraylist_t *a, mpz_t x) {
+	if (a->size == a->capacity) arraylist_enlargeCapacity(a);
+	mpz_init_set(a->data[a->size++], x); // on insère x à la fin du tableau
 }
 
-bool arraylist_addPos(arraylist_t * a, mpz_t x, int pos) {
-	if(!arraylist_needToEnlargeCapacity(a) || pos < 0 || pos > a->capacity) {
-		return false; // Erreur
+bool arraylist_addPos(arraylist_t *a, mpz_t x, int pos) {
+	if (pos < 0 || pos > a->size) return false; // pos en dehors des limites du tableau
+	if (a->size == a->capacity) arraylist_enlargeCapacity(a);
+	for (int i = a->size; i > pos; i--) { // On déplace les valeurs vers la droite une par une en partant de la fin
+		mpz_init(a->data[i]);                  // on initialise la nouvelle case
+		mpz_set(a->data[i], a->data[i - 1]);   // on copie la valeur de gauche vers la droite
 	}
-	for(int i = a->size; i > pos; i--) {
-		mpz_init_set(a->data[i],a->data[i - 1]); // a->data[i] = a->data[i - 1]
-	}
-	mpz_init_set(a->data[pos],x); // a->data[pos] = x
+	mpz_init_set(a->data[pos], x); // on insère x à la bonne place
 	a->size++;
 	return true;
 }
 
-int arraylist_getMiddleIndexDichotomous(arraylist_t * a, mpz_t x) {
-	int left = 0;
-	int right = a->size - 1;
-	int middle = 0;
+static int arraylist_findInsertIndexDichotomous(arraylist_t *a, mpz_t x) {
+	int left = 0, right = a->size - 1; // index gauche et droite du tableau
 
-	while(left <= right) {
-		middle = left + (right - left) / 2;
-		int cmp = mpz_cmp(a->data[middle],x);
+	while (left <= right) {
+		int mid = left + (right - left) / 2;
+		int cmp = mpz_cmp(a->data[mid], x); // e = x ?
 
-		if(cmp == 0) { // Si a->data[middle] == x, l'élément est présent dans le tableau, retournez -1
-			return -1;
-		}
-		if(cmp > 0) { // Si a->data[middle] > x, l'élément recherché est plus petit, recherchez dans la moitié gauche
-			right = middle - 1;
-		} else { // Sinon, recherchez dans la moitié droite
-			left = middle + 1;
-		}
+		if (cmp == 0) return -1; // e = x, déjà présent
+		else if (cmp > 0) right = mid - 1; // e > x, recherchez dans la moitié gauche du tab
+		else left = mid + 1; // e < x, recherchez dans la moitié droite du tab
 	}
 
-	return middle; // Si l'élément n'est pas présent dans le tableau, retournez l'index du dernier milieu calculé
+	return left; // non présent, retourne l'index adéquat
 }
 
-bool arraylist_isEmpty(arraylist_t * a) { return a->size == 0; }
-
-bool arraylist_contains(arraylist_t * a, mpz_t x) {
-	return arraylist_getMiddleIndexDichotomous(a,x) == -1; // Renvoie true si l'élement existe déjà (si la fonction renvoie -1)
+bool arraylist_isEmpty(arraylist_t *a) {
+	return !a || a->size == 0;
 }
 
-void arraylist_addDichotomous(arraylist_t * a, mpz_t x) { // Ajoute l'élement dans le set en respectant l'ordre croissant (tableau trié)
-	if(arraylist_isEmpty(a) || mpz_cmp(x,a->data[a->size - 1]) > 0) { // Si l'arraylist est vide ou x > a->data[a->size - 1]
-		arraylist_add(a,x);
+bool arraylist_contains(arraylist_t *a, mpz_t x) {
+	return arraylist_findInsertIndexDichotomous(a,x) == -1;
+}
+
+void arraylist_addDichotomous(arraylist_t *a, mpz_t x) { // Ajoute l'élement dans le set en respectant l'ordre croissant (tableau trié)
+	if (arraylist_isEmpty(a) || mpz_cmp(x, a->data[a->size - 1]) > 0) { // Si l'arraylist est vide ou x > dernier élément
+		arraylist_add(a, x);
 		return;
 	}
 
-	int middleIndex = arraylist_getMiddleIndexDichotomous(a,x);
-	if(middleIndex != -1) { // Si l'élement n'existe pas déjà
-		if(mpz_cmp(x,a->data[middleIndex]) < 0) { // Si x < a->data[middleIndex]
-			arraylist_addPos(a,x,middleIndex);
-		} else {
-			arraylist_addPos(a,x,middleIndex + 1);
-		}
+	int insertIndex = arraylist_findInsertIndexDichotomous(a, x);
+	if (insertIndex != -1) { // Si l'élement n'existe pas déjà
+		arraylist_addPos(a, x, insertIndex);
 	}
 }
